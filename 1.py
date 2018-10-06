@@ -218,7 +218,8 @@ def add_estado(aut, temp, st):
 				for j in t:
 					aux += j
 				aux += '>'
-				aut[i].append(aux)
+				if aux not in aut[i]:
+					aut[i].append(aux)
 
 def criar_NovasRegras(aut, temp, st):
 	novas_regras = []
@@ -275,6 +276,11 @@ def remover_producoes_inalcancaveis(aut, alcancaveis):
 			aut.remove(aut[i])
 	add_estado_erro(aut)
 
+def busca_EstMortos(aut):
+	mortos = []
+	for i in aut:
+		print(i)
+
 def print_Automato(aut):
 	st = get_simbolosTerminais(aut)
 	for a in aut:
@@ -293,6 +299,7 @@ def print_Automato(aut):
 			aux += ' ε'
 		aux = aux.replace('  ', ' ')
 		aux = aux.replace('> ', '> | ')
+		aux = aux.replace('>::', '> ::')
 
 		print(aux)
 
@@ -305,15 +312,14 @@ automato = formatar(automato)
 funcao(automato)
 #Encontrar as epslon transiçoes
 ep_transicao(automato);
-for i in automato:
-	print(i)
 
 temp = []
 determinizacao(automato, temp)
 alcancaveis = ['<S>']
 minimizacao(automato, alcancaveis, 0)
 remover_producoes_inalcancaveis(automato, alcancaveis)
-#print_Automato(automato)
+#mortos = busca_EstMortos(automato)
+print_Automato(automato)
 
 #print('\n')
 
