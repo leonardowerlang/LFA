@@ -84,7 +84,6 @@ def add_producoes(aut, p1, p2):
 		if i not in p1:
 			p1.append(i)
 	p1.remove(p2[0])
-
 	for i in aut:
 		for j in i:
 			if j[1:] == p1[0]:
@@ -123,8 +122,6 @@ def ep_transicao(aut):
 	for i in tabela:
 		if len(i) > 1:
 			copia_producoes(i, aut)
-
-## Prolema esta aqui para baixo
 
 def get_simbolosTerminais(aut):
 	st = []
@@ -276,10 +273,45 @@ def remover_producoes_inalcancaveis(aut, alcancaveis):
 			aut.remove(aut[i])
 	add_estado_erro(aut)
 
+def EstMortos(aut, mortos, p):
+	if p in mortos:
+		mortos.remove(p)
+	for i in aut:
+		for j in i:
+			if j[1:] == p and i[0] in mortos:
+				EstMortos(aut, mortos, i[0])
+
+
 def busca_EstMortos(aut):
+	producoes = []
+	producoesTerminais = []
 	mortos = []
 	for i in aut:
-		print(i)
+		for j in i:
+			if len(j) == 3 and j != '::=' and j not in producoes:
+				producoes.append(j)
+			elif len(j) > 3 and j[0] != '<' and j[1:] not in producoes:
+				producoes.append(j[1:])
+		if 'ε' in i or i[0] == '<->':
+			producoesTerminais.append(i[0])
+	mortos = producoes.copy()
+	for i in producoesTerminais:
+		if i in mortos:
+			mortos.remove(i)
+	for i in producoesTerminais:
+		if i != '<->':
+			EstMortos(aut, mortos, i)
+	return mortos
+
+def removerMortos(aut, mortos):
+	for i in range(len(aut) - 1, -1, -1):
+		if aut[i][0] in mortos:
+			print(i)
+			aut.pop(i)
+			continue
+		for j in range(len(aut[i]) - 1, -1, -1):
+			if aut[i][j][1:] in mortos:
+				aut[i].pop(j)
 
 def print_Automato(aut):
 	st = get_simbolosTerminais(aut)
@@ -300,7 +332,6 @@ def print_Automato(aut):
 		aux = aux.replace('  ', ' ')
 		aux = aux.replace('> ', '> | ')
 		aux = aux.replace('>::', '> ::')
-
 		print(aux)
 
 tokens = ler_tokens()
@@ -310,22 +341,13 @@ automato = adicionar_token(automato, tokens)
 automato = adicionar_regras(automato, regras)
 automato = formatar(automato)
 funcao(automato)
-#Encontrar as epslon transiçoes
+#Encontrar e remover as epslon transiçoes: Criar tabela, Copiar os estados, Dulplicar: bS -> bA para que S ::= A
 ep_transicao(automato);
-
 temp = []
 determinizacao(automato, temp)
 alcancaveis = ['<S>']
 minimizacao(automato, alcancaveis, 0)
 remover_producoes_inalcancaveis(automato, alcancaveis)
-#mortos = busca_EstMortos(automato)
+mortos = busca_EstMortos(automato)
+removerMortos(automato, mortos)
 print_Automato(automato)
-
-#print('\n')
-
-
-
-# Cria a tabela 
-# Copia os estados
-# Duplicar : bS -> bA
-
